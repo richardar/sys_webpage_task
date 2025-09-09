@@ -1,3 +1,6 @@
+setuptools>=65
+wheel
+
 Flask==3.0.3
 gunicorn==21.2.0
 reportlab==4.2.2
