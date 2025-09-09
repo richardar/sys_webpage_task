@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flask + React Table, Chart, OCR</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel Standalone for in-browser JSX transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Table, Chart, OCR Demo</h1>
+      <p>
+        A simple demo using Flask backend and React front-end. Each row supports PDF upload
+        and client-side OCR (no paid services). A test PDF is available at
+        <a href="/static/test.pdf" target="_blank" rel="noreferrer">/static/test.pdf</a>.
+      </p>
+
+      <div id="root"></div>
+    </div>
+
+    <script type="text/babel" data-presets="env,react" src="/static/js/app.js"></script>
+  </body>
+  </html>
+
+
