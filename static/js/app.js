@@ -1,7 +1,6 @@
 (() => {
   const { useState, useEffect, useMemo, useRef } = React;
 
-  // Global fetch tracker to show loaders automatically
   (function installGlobalFetchTracker() {
     if (window.__fetchTrackerInstalled) return;
     window.__fetchTrackerInstalled = true;
@@ -412,7 +411,7 @@
       showToast._t = window.setTimeout(() => setToast(''), 3000);
     };
 
-    // Load server rows on mount
+
     useEffect(() => {
       const onNet = (e) => setNetActive(e.detail.active || 0);
       window.addEventListener('net:active', onNet);
@@ -468,12 +467,12 @@
         };
         let rowId = addModal.tempRowId;
         let updated = addModal.tempRowData;
-        // If user uploaded first, we already have a temp row on server
+
         if (!rowId) {
           const createdRes = await fetch('/api/rows', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
           const created = await createdRes.json();
           rowId = created.id;
-          // Upload file to that row
+
           const form = new FormData();
           form.append('file', addModal.file);
           const up = await fetch(`/api/upload/${rowId}`, { method: 'POST', body: form });
@@ -534,7 +533,7 @@
         setRows((prev) => prev.map((r) => (r.id === id ? updated : r)));
         showToast('OCR re-run completed');
         
-        // Show OCR text in popup
+
         const ocrText = updated.ocrText || updated.ocrWarning || 'No OCR text recognized.';
         const fileName = updated.fileName || 'OCR Result';
         setOcrModal({ open: true, text: ocrText, title: fileName });
@@ -576,12 +575,23 @@
     const downloadReport = async () => {
       try {
         setIsGenerating(true);
+        const res = await fetch('/api/report');
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          alert(err.error || 'Failed to generate report');
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = '/api/report';
+        a.href = url;
         a.download = 'external_report.pdf';
         document.body.appendChild(a);
         a.click();
         a.remove();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Download failed: ' + (e?.message || e));
       } finally {
         setIsGenerating(false);
       }
@@ -594,7 +604,7 @@
 
     const loadSample = async () => {
       setIsLoadingSample(true);
-      // Create a couple of rows and auto-attach the sample PDF so they are editable
+
       const samples = [
         { description: 'Office Chair Replacement', quantity: 5, unitCost: 125.99, category: 'Furniture', vendor: 'OfficeMax Solutions', building: 'Main Building', floor: '3rd Floor', room: 'A301' },
         { description: 'Network Switch Upgrade', quantity: 2, unitCost: 450.00, category: 'IT Equipment', vendor: 'TechGear Inc', building: 'Server Room', floor: 'Basement', room: 'B001' },
@@ -605,7 +615,7 @@
         { description: 'Printer Toner Cartridges', quantity: 12, unitCost: 45.75, category: 'Office Supplies', vendor: 'PrintPro Solutions', building: 'Main Building', floor: '2nd Floor', room: 'Copy Room' },
         { description: 'HVAC Filter Replacement', quantity: 4, unitCost: 32.50, category: 'HVAC', vendor: 'Climate Control Inc', building: 'Main Building', floor: 'All Floors', room: 'Mechanical Room' },
       ];
-      // Fetch the sample PDF once
+
       const pdfRes = await fetch('/static/test.pdf');
       if (!pdfRes.ok) {
         alert('Could not load sample PDF');
@@ -622,7 +632,7 @@
         const up = await fetch(`/api/upload/${row.id}`, { method: 'POST', body: form });
         let updated = up.ok ? await up.json() : row;
         
-        // Override OCR values with our sample data to avoid duplicate values
+
         const sampleData = {
           description: s.description,
           quantity: s.quantity,

@@ -204,3 +204,25 @@ label.upload {
   pointer-events: none;
 }
 
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .container { padding: 20px 12px; }
+  h1 { font-size: 20px; }
+  .toolbar { flex-wrap: wrap; }
+  .toolbar > * { flex: 1 1 48%; }
+  .toolbar a, .toolbar button { width: 100%; }
+  .chart-wrapper { padding: 10px; }
+  table.data-table th, table.data-table td { padding: 8px; }
+}
+
+@media (max-width: 640px) {
+  .container { padding: 16px 10px; }
+  .toolbar > * { flex: 1 1 100%; }
+  .grand-total { text-align: left; margin-top: 8px; }
+  .ocr-details { max-width: 100%; }
+  table.data-table th:nth-child(3),
+  table.data-table td:nth-child(3) { white-space: nowrap; }
+  canvas { max-width: 100%; height: auto !important; }
+  .modal { width: 96vw; }
+}
+
