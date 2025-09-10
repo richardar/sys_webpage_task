@@ -34,6 +34,20 @@ button {
 
 button:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* diff buttions */
+.btn { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.btn-primary { background: #155eef; border-color: #155eef; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #0f49bb; border-color: #0f49bb; }
+.btn-secondary { background: #fff; border-color: #cfd3d9; color: #111827; }
+.btn-secondary:hover:not(:disabled) { background: #f5f6f7; }
+.btn-danger { background: #e11d48; border-color: #e11d48; color: #fff; }
+.btn-danger:hover:not(:disabled) { background: #be123c; border-color: #be123c; }
+.btn-ghost { background: transparent; border-color: transparent; color: #111827; }
+.btn-ghost:hover:not(:disabled) { background: #f5f6f7; border-color: #e5e7eb; }
+
+.icon { width: 16px; height: 16px; display: inline-block; vertical-align: -2px; }
+.icon svg { width: 16px; height: 16px; display: block; }
+
 .table-wrapper {
   overflow-x: auto;
   background: white;
@@ -67,6 +81,25 @@ input[type="text"], input[type="number"] {
   max-width: 100%;
 }
 
+input[type="date"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d9d9e3;
+  border-radius: 6px;
+  background: #fff;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus,
+button:focus { outline: none; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18); border-color: #93c5fd; }
+
+/* compact form grid */
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.form-grid label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.form-grid label small { color: #666; }
+.form-grid .full { grid-column: 1 / span 2; }
+
 input[type="file"] {
   max-width: 100%;
 }
@@ -79,12 +112,15 @@ label.upload {
   padding: 6px 8px;
   background: #fcfcff;
 }
+label.upload:hover { background: #f5faff; border-color: #93c5fd; }
 
 .empty-state {
   text-align: center;
   color: #666;
   padding: 18px;
 }
+
+.empty-state .icon { opacity: 0.6; }
 
 .toast {
   position: fixed;
@@ -110,11 +146,14 @@ label.upload {
   padding: 12px;
   overflow: hidden;
 }
+.chart-wrapper h3 { margin: 0 0 8px; display: flex; align-items: center; gap: 6px; }
 
 .grand-total {
   font-weight: 600;
   text-align: right;
 }
+
+.grand-total strong { font-weight: 700; }
 
 .ocr-top {
   background: white;
@@ -125,7 +164,6 @@ label.upload {
 }
 
 
-/* Simple modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -152,6 +190,7 @@ label.upload {
   padding: 10px 12px;
   border-bottom: 1px solid #eee;
 }
+.modal-header strong { display: inline-flex; align-items: center; gap: 6px; }
 .modal-body {
   padding: 12px;
   white-space: pre-wrap;
@@ -167,7 +206,7 @@ label.upload {
   border-top: 1px solid #eee;
 }
 
-/* Circular spinner for loading buttons */
+/* circular spinner for loading buttons */
 .spinner {
   width: 14px;
   height: 14px;
@@ -184,7 +223,7 @@ label.upload {
   to { transform: rotate(360deg); }
 }
 
-/* Larger spinner for overlays */
+/* spinner large overleay */
 .spinner-lg {
   width: 32px;
   height: 32px;
@@ -192,7 +231,7 @@ label.upload {
   margin-right: 0;
 }
 
-/* Global loading overlay */
+/* global lodder */
 .loading-overlay {
   position: fixed;
   inset: 0;
@@ -204,7 +243,7 @@ label.upload {
   pointer-events: none;
 }
 
-/* Responsive adjustments */
+/* responsive adjustments */
 @media (max-width: 900px) {
   .container { padding: 20px 12px; }
   h1 { font-size: 20px; }

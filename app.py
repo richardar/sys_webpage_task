@@ -1,4 +1,4 @@
-import os
+with the same import os
 import json
 import time
 from datetime import datetime
@@ -242,7 +242,7 @@ def parse_fields_from_text(text: str) -> dict:
 def upload_and_ocr(row_id: str):
     # save pdf and run ocr
     if "file" not in request.files:
-        return jsonify({"error": "No file"}), 400
+        return jsonify({"error": "no file"}), 400
     f = request.files["file"]
     pdf_bytes = f.read()
     uploads_dir = os.path.join(app.static_folder, "uploads")
@@ -253,7 +253,7 @@ def upload_and_ocr(row_id: str):
         with open(disk_path, "wb") as out:
             out.write(pdf_bytes)
     except Exception as exc:
-        return jsonify({"error": f"Failed saving file: {exc}"}), 500
+        return jsonify({"error": f"faile saving file: {exc}"}), 500
     text = extract_text_from_pdf_bytes(pdf_bytes)
 
     for row in ROWS:
@@ -270,7 +270,7 @@ def upload_and_ocr(row_id: str):
             response = dict(row)
             if not (text or "").strip():
                 response["ocrWarning"] = (
-                    "No text recognized. Ensure easyocr and pypdfium2 are installed."
+                    "No text recognized ensure easyocr and pypdfium2 are installed."
                 )
             return jsonify(response)
     return jsonify({"error": "Row not found"}), 404
@@ -300,12 +300,12 @@ def rerun_ocr(row_id: str):
                 response = dict(row)
                 if not (text or "").strip():
                     response["ocrWarning"] = (
-                        "No text recognized. Ensure easyocr and pypdfium2 are installed."
+                        "No text recognize ansure easyocr and pypdfium2 are installed."
                     )
                 return jsonify(response)
             except Exception as exc:
-                return jsonify({"error": f"OCR failed: {exc}"}), 500
-    return jsonify({"error": "Row not found"}), 404
+                return jsonify({"error": f"ocr failed: {exc}"}), 500
+    return jsonify({"error": "row not found"}), 404
 
 
 @app.get("/api/chart-data")
@@ -338,7 +338,7 @@ def get_prices(row_id: str):
     for row in ROWS:
         if row["id"] == row_id:
             return jsonify(row.get("priceHistory", []))
-    return jsonify({"error": "Row not found"}), 404
+    return jsonify({"error": "rowa not found"}), 404
 
 
 @app.post("/api/rows/<row_id>/prices")
@@ -353,7 +353,7 @@ def add_price(row_id: str):
         if row["id"] == row_id:
             row.setdefault("priceHistory", []).append(price_point)
             return jsonify(price_point), 201
-    return jsonify({"error": "Row not found"}), 404
+    return jsonify({"error": "row not found"}), 404
 
 
 @app.delete("/api/rows/<row_id>/prices/<int:index>")
@@ -366,7 +366,7 @@ def delete_price(row_id: str, index: int):
                 history.pop(index)
                 return "", 204
             return jsonify({"error": "Index out of range"}), 400
-    return jsonify({"error": "Row not found"}), 404
+    return jsonify({"error": "row not found"}), 404
 
 
 @app.route("/api/report", methods=["GET", "POST"])

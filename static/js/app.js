@@ -2,6 +2,29 @@
   // track fetch requests count
   const { useState, useEffect, useMemo, useRef } = React;
 
+  
+  const Icon = ({ name }) => {
+    const paths = {
+      plus: '<path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>',
+      upload: '<path d="M7 10a1 1 0 102 0V6.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3A1 1 0 005.707 7.707L7 6.414V10z"/><path d="M4 14a2 2 0 002 2h8a2 2 0 002-2v-2a1 1 0 10-2 0v2H6v-2a1 1 0 10-2 0v2z"/>',
+      delete: '<path d="M6 7a1 1 0 012 0v6a1 1 0 11-2 0V7zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V7z"/><path d="M4 5a1 1 0 011-1h2l1-1h4l1 1h2a1 1 0 110 2H5a1 1 0 01-1-1z"/><path d="M6 18a2 2 0 01-2-2V6h12v10a2 2 0 01-2 2H6z"/>',
+      ocr: '<path d="M4 5a2 2 0 012-2h6l4 4v8a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"/><path d="M9 9h2a2 2 0 110 4H9V9z" fill="#fff"/>',
+      pdf: '<path d="M14 2H6a2 2 0 00-2 2v12a2 2 0 002 2h8V2z"/><path d="M14 2v4a2 2 0 002 2h4"/>',
+      file: '<path d="M6 2h5l5 5v11a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/>',
+      chart: '<path d="M4 19h16M7 16V8m5 8v-5m5 5V6"/>',
+      play: '<path d="M5 3.5v17l15-8.5-15-8.5z"/>',
+      stop: '<path d="M6 6h12v12H6z"/>',
+      close: '<path d="M6 6l12 12M18 6L6 18"/>',
+      search: '<path d="M11 4a7 7 0 105.196 12.196L20 20"/>',
+      calendar: '<path d="M7 2v3M17 2v3M4 7h16M5 10h3m4 0h3m4 0h-3M5 14h3m4 0h3"/>',
+      money: '<path d="M4 10h16v4H4z"/><path d="M8 8h8v8H8z"/>',
+      speaker: '<path d="M5 10v4h3l4 3V7l-4 3H5z"/><path d="M16 9a4 4 0 010 6M18 7a7 7 0 010 10"/>',
+      download: '<path d="M12 3v10m0 0l-4-4m4 4l4-4"/><path d="M4 17h16v2H4z"/>'
+    };
+    const svg = paths[name] || '';
+    return React.createElement('span', { className: 'icon', dangerouslySetInnerHTML: { __html: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" xmlns="http://www.w3.org/2000/svg">${svg}</svg>` } });
+  };
+
   (function installGlobalFetchTracker() {
     // monkey patch fetch quick
     if (window.__fetchTrackerInstalled) return;
@@ -167,7 +190,7 @@
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           <input type="number" step="0.01" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
-          <button onClick={add} disabled={isAdding}>{isAdding ? (<><span className="spinner" />Adding…</>) : 'Add'}</button>
+          <button className="btn btn-primary" onClick={add} disabled={isAdding}>{isAdding ? (<><span className="spinner" />Adding…</>) : (<><Icon name="plus" />Add</>)}</button>
         </div>
         <table className="data-table">
           <thead><tr><th>Date</th><th>Price</th><th></th></tr></thead>
@@ -246,16 +269,16 @@
                 try { await onUpload(f); } finally { setIsUploading(false); }
               }}
             />
-            {isUploading ? (<><span className="spinner" />Uploading…</>) : (row.fileName ? `Uploaded: ${row.fileName}` : 'Choose PDF…')}
+            {isUploading ? (<><span className="spinner" />Uploading…</>) : (row.fileName ? (<><Icon name="upload" />Uploaded: {row.fileName}</>) : (<><Icon name="upload" />Choose PDF…</>))}
           </label>
           {' '}
           {row.filePath ? (
-            <a href={row.filePath} target="_blank" rel="noreferrer">View PDF</a>
+            <a href={row.filePath} target="_blank" rel="noreferrer"><Icon name="pdf" /> View PDF</a>
           ) : null}
           {' '}
-          <button onClick={async () => { setIsOcr(true); try { await onRunOcr(); } finally { setIsOcr(false); } }} disabled={!row.storedFileName || isOcr} title={row.storedFileName ? 'Re-run OCR' : 'Upload a PDF first'}>{isOcr ? (<><span className="spinner" />Running…</>) : 'Run OCR'}</button>
+          <button className="btn btn-secondary" onClick={async () => { setIsOcr(true); try { await onRunOcr(); } finally { setIsOcr(false); } }} disabled={!row.storedFileName || isOcr} title={row.storedFileName ? 'Re-run OCR' : 'Upload a PDF first'}>{isOcr ? (<><span className="spinner" />Running…</>) : (<><Icon name="ocr" />Run OCR</>)}</button>
           {' '}
-          <button onClick={async () => { setIsDeleting(true); try { await onDelete(); } finally { setIsDeleting(false); } }} aria-label="Delete row" disabled={isDeleting}>{isDeleting ? (<><span className="spinner" />Deleting…</>) : 'Delete'}</button>
+          <button className="btn btn-danger" onClick={async () => { setIsDeleting(true); try { await onDelete(); } finally { setIsDeleting(false); } }} aria-label="Delete row" disabled={isDeleting}>{isDeleting ? (<><span className="spinner" />Deleting…</>) : (<><Icon name="delete" />Delete</>)}</button>
           {row.ocrText ? (
             <details className="ocr-details">
               <summary>OCR Text</summary>
@@ -264,7 +287,7 @@
           ) : null}
           <details className="ocr-details">
             <summary>Details</summary>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+            <div className="form-grid">
               <label>
                 Category
                 <input type="text" value={row.category || ''} onChange={(e) => onChange({ category: e.target.value })} disabled={disabled} />
@@ -329,11 +352,11 @@
                 Discount
                 <input type="number" step="0.01" value={row.discount || 0} onChange={(e) => onChange({ discount: e.target.value })} disabled={disabled} />
               </label>
-              <label style={{ gridColumn: '1 / span 2' }}>
+              <label className="full">
                 Status
                 <input type="text" value={row.status || ''} onChange={(e) => onChange({ status: e.target.value })} disabled={disabled} />
               </label>
-              <label style={{ gridColumn: '1 / span 2' }}>
+              <label className="full">
                 Notes
                 <input type="text" value={row.notes || ''} onChange={(e) => onChange({ notes: e.target.value })} disabled={disabled} />
               </label>
@@ -686,11 +709,11 @@
         {}
 
         <div className="toolbar">
-          <button onClick={addRow} disabled={isAddingRow}>{isAddingRow ? (<><span className="spinner" />Adding…</>) : 'Add Row'}</button>
-          <button onClick={loadSample} disabled={isLoadingSample}>{isLoadingSample ? (<><span className="spinner" />Loading…</>) : 'Load Sample Data'}</button>
-          <button onClick={showAuditSummary}>Audit Summary</button>
-          <a href="/static/test.pdf" download target="_blank" rel="noreferrer"><button type="button">Download Sample PDF</button></a>
-          <button onClick={downloadReport} disabled={isGenerating}>{isGenerating ? (<><span className="spinner" />Generating…</>) : 'Download Report PDF'}</button>
+          <button className="btn btn-primary" onClick={addRow} disabled={isAddingRow}>{isAddingRow ? (<><span className="spinner" />Creating…</>) : (<><Icon name="plus" />Add Row</>)}</button>
+          <button className="btn btn-secondary" onClick={loadSample} disabled={isLoadingSample}>{isLoadingSample ? (<><span className="spinner" />Loading…</>) : (<><Icon name="file" />Load Sample Data</>)}</button>
+          <button className="btn btn-secondary" onClick={showAuditSummary}><Icon name="search" />Audit Summary</button>
+          <a href="/static/test.pdf" download target="_blank" rel="noreferrer"><button type="button" className="btn btn-secondary"><Icon name="download" />Download Sample PDF</button></a>
+          <button className="btn btn-secondary" onClick={downloadReport} disabled={isGenerating}>{isGenerating ? (<><span className="spinner" />Generating…</>) : (<><Icon name="pdf" />Download Report PDF</>)}</button>
         </div>
 
         <DataTable rows={rows} onChangeField={updateRowField} onUpload={handleFileChange} onDelete={deleteRow} onRunOcr={runOcr} onViewOcr={viewOcr} />
@@ -709,7 +732,7 @@
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <strong>Audit Summary</strong>
-                <button onClick={() => { stopAudit(); setAuditModal({ open: false, data: null, speaking: false }); }}>Close</button>
+                <button className="btn btn-ghost" onClick={() => { stopAudit(); setAuditModal({ open: false, data: null, speaking: false }); }}>Close</button>
               </div>
               <div className="modal-body">
                 {auditModal.data ? (
@@ -719,11 +742,11 @@
                     <div>Average per item: {auditModal.data.average}</div>
                     <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
                       {!auditModal.speaking ? (
-                        <button onClick={playAudit}>Play</button>
+                        <button className="btn btn-primary" onClick={playAudit}>Play</button>
                       ) : (
-                        <button onClick={stopAudit}>Stop</button>
+                        <button className="btn btn-danger" onClick={stopAudit}>Stop</button>
                       )}
-                      <button onClick={downloadReport}>Download PDF</button>
+                      <button className="btn btn-secondary" onClick={downloadReport}>Download PDF</button>
                     </div>
                   </div>
                 ) : null}
@@ -745,8 +768,8 @@
                 }}>Close</button>
               </div>
               <div className="modal-body">
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-                  <label style={{ gridColumn: '1 / span 2' }}>PDF (required, upload first)
+                <div className="form-grid">
+                  <label className="full">PDF (required, upload first)
                     <input type="file" accept="application/pdf" onChange={async (e) => {
                       const file = e.target.files && e.target.files[0];
                       if (!file) return;
@@ -781,14 +804,14 @@
                       }
                     }} />
                   </label>
-                  {addModal.isUploading ? <div style={{ gridColumn: '1 / span 2' }}>Uploading and running OCR…</div> : null}
+                  {addModal.isUploading ? <div className="full">Uploading and running OCR…</div> : null}
                   {addModal.ocrText ? (
-                    <div style={{ gridColumn: '1 / span 2' }}>
+                    <div className="full">
                       <strong>Recognized Text</strong>
                       <pre className="modal-body" style={{ maxHeight: 200, overflow: 'auto' }}>{addModal.ocrText}</pre>
                     </div>
                   ) : null}
-                  <label style={{ gridColumn: '1 / span 2' }}>Description*
+                  <label className="full">Description*
                     <input type="text" value={addModal.description} onChange={(e) => setAddModal((m) => ({ ...m, description: e.target.value }))} />
                   </label>
                   <label>Date
@@ -815,10 +838,10 @@
                   <label>Discount
                     <input type="number" step="0.01" value={addModal.discount} onChange={(e) => setAddModal((m) => ({ ...m, discount: e.target.value }))} />
                   </label>
-                  <label style={{ gridColumn: '1 / span 2' }}>Status
+                  <label className="full">Status
                     <input type="text" value={addModal.status} onChange={(e) => setAddModal((m) => ({ ...m, status: e.target.value }))} />
                   </label>
-                  <label style={{ gridColumn: '1 / span 2' }}>Notes
+                  <label className="full">Notes
                     <input type="text" value={addModal.notes} onChange={(e) => setAddModal((m) => ({ ...m, notes: e.target.value }))} />
                   </label>
                   <label>Building
@@ -872,7 +895,7 @@
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <strong>{ocrModal.title}</strong>
-                <button onClick={() => setOcrModal({ open: false, text: '', title: '' })}>Close</button>
+                <button className="btn btn-ghost" onClick={() => setOcrModal({ open: false, text: '', title: '' })}>Close</button>
               </div>
               <pre className="modal-body" style={{ maxHeight: 300, overflow: 'auto' }}>{ocrModal.text}</pre>
             </div>
