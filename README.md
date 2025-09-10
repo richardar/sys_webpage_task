@@ -36,13 +36,28 @@ Windows notes (OCR dependencies)
 - After installing, restart your shell so PATH updates are applied.
 
 Debugging chart not updating for one row
-If the chart updates for all rows except one:
-1. Verify state: ensure the problematic row's quantity and unitCost are numbers (not empty strings). In this app we coerce to numbers on change. Add console logs to inspect rows state.
-2. Check keys: each row uses index as key. If rows are being re-ordered or removed, consider a stable id for each row to avoid reconciliation issues.
-3. Confirm dataset length matches labels length; Chart.js requires them to be aligned.
-4. Ensure computeRowTotal returns a number (not NaN). Guard parsing and default to 0.
-5. Check Chart.js update() is called. Our useChart hook updates on [labels, data] changes.
-6. Inspect for render errors in DevTools console. Fix any exceptions during OCR or data parsing that could prevent state updates.
+# Chart not updating for one row
+
+If chart updates for all rows except one, here are the debugging steps to rectify it:
+
+1. **Row state**  
+   Maybe that row has `quantity` or `unitCost` as string instead of number. We coerce to number on change but better to add some console.log to see what’s actually in state.  
+
+2. **Keys issue**  
+   Right now rows use index as key. If rows get reordered or removed, React might mess up. Safer to use an id for each row instead of index.  
+
+3. **Dataset vs labels**  
+   Chart.js wants data length same as labels length. If they don’t match, the chart won’t update right.  
+
+4. **Row total**  
+   `computeRowTotal` must always give a number. If it returns NaN then chart breaks. Put a guard and fallback to 0.  
+
+5. **Chart update call**  
+   Need to check if `chart.update()` actually gets called. Our hook depends on `[labels, data]`, so confirm those are changing.  
+
+6. **Console errors**  
+   Look in devtools, sometimes errors in OCR or parsing can stop state updates for that single row.
+
 
 Tech choices
 - Frontend via CDN for simplicity (React 18, Chart.js 4)
