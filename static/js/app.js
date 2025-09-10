@@ -654,8 +654,8 @@
     const loadSample = async () => {
       // load some sample rows
       setIsLoadingSample(true);
-
-      const samples = [
+      try {
+        const samples = [
         { description: 'Office Chair Replacement', quantity: 5, unitCost: 125.99, category: 'Furniture', vendor: 'OfficeMax Solutions', building: 'Main Building', floor: '3rd Floor', room: 'A301' },
         { description: 'Network Switch Upgrade', quantity: 2, unitCost: 450.00, category: 'IT Equipment', vendor: 'TechGear Inc', building: 'Server Room', floor: 'Basement', room: 'B001' },
         { description: 'Window Cleaning Service', quantity: 1, unitCost: 85.50, category: 'Maintenance', vendor: 'Crystal Clear Windows', building: 'Main Building', floor: 'All Floors', room: 'Exterior' },
@@ -664,43 +664,45 @@
         { description: 'Carpet Cleaning', quantity: 1, unitCost: 200.00, category: 'Cleaning', vendor: 'Fresh Clean Co', building: 'Conference Center', floor: 'Ground Floor', room: 'Main Hall' },
         { description: 'Printer Toner Cartridges', quantity: 12, unitCost: 45.75, category: 'Office Supplies', vendor: 'PrintPro Solutions', building: 'Main Building', floor: '2nd Floor', room: 'Copy Room' },
         { description: 'HVAC Filter Replacement', quantity: 4, unitCost: 32.50, category: 'HVAC', vendor: 'Climate Control Inc', building: 'Main Building', floor: 'All Floors', room: 'Mechanical Room' },
-      ];
+        ];
 
-      const pdfRes = await fetch('/static/test.pdf');
-      if (!pdfRes.ok) {
-        alert('Could not load sample PDF');
-        return;
+        const pdfRes = await fetch('/static/test.pdf');
+        if (!pdfRes.ok) throw new Error('Could not load sample PDF');
+        const pdfBlob = await pdfRes.blob();
+        const sampleFile = new File([pdfBlob], 'sample.pdf', { type: 'application/pdf' });
+
+        for (const s of samples) {
+          const res = await fetch('/api/rows', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(s) });
+          if (!res.ok) throw new Error('Failed creating sample row');
+          const row = await res.json();
+          const form = new FormData();
+          form.append('file', sampleFile);
+          const up = await fetch(`/api/upload/${row.id}`, { method: 'POST', body: form });
+          let updated = up.ok ? await up.json() : row;
+
+          const sampleData = {
+            description: s.description,
+            quantity: s.quantity,
+            unitCost: s.unitCost,
+            category: s.category,
+            vendor: s.vendor,
+            building: s.building || '',
+            floor: s.floor || '',
+            room: s.room || '',
+            ocrText: `Sample invoice for ${s.description}\nQuantity: ${s.quantity}\nUnit Cost: $${s.unitCost}\nTotal: $${s.quantity * s.unitCost}`,
+            fileName: `sample_${s.description.replace(/\s+/g, '_').toLowerCase()}.pdf`
+          };
+          const put = await fetch(`/api/rows/${row.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sampleData) });
+          if (put.ok) updated = await put.json();
+          setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)).concat(prev.find((r) => r.id === updated.id) ? [] : [updated]));
+        }
+        showToast('Loaded sample rows with attached PDF');
+      } catch (err) {
+        console.error(err);
+        alert((err && err.message) || 'Failed to load sample data');
+      } finally {
+        setIsLoadingSample(false);
       }
-      const pdfBlob = await pdfRes.blob();
-      const sampleFile = new File([pdfBlob], 'sample.pdf', { type: 'application/pdf' });
-
-      for (const s of samples) {
-        const res = await fetch('/api/rows', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(s) });
-        const row = await res.json();
-        const form = new FormData();
-        form.append('file', sampleFile);
-        const up = await fetch(`/api/upload/${row.id}`, { method: 'POST', body: form });
-        let updated = up.ok ? await up.json() : row;
-        
-
-        const sampleData = {
-          description: s.description,
-          quantity: s.quantity,
-          unitCost: s.unitCost,
-          category: s.category,
-          vendor: s.vendor,
-          building: s.building || '',
-          floor: s.floor || '',
-          room: s.room || '',
-          ocrText: `Sample invoice for ${s.description}\nQuantity: ${s.quantity}\nUnit Cost: $${s.unitCost}\nTotal: $${s.quantity * s.unitCost}`,
-          fileName: `sample_${s.description.replace(/\s+/g, '_').toLowerCase()}.pdf`
-        };
-        const put = await fetch(`/api/rows/${row.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sampleData) });
-        if (put.ok) updated = await put.json();
-        setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)).concat(prev.find((r) => r.id === updated.id) ? [] : [updated]));
-      }
-      showToast('Loaded sample rows with attached PDF');
-      setIsLoadingSample(false);
     };
 
 
