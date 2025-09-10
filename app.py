@@ -14,6 +14,7 @@ ROWS: list[dict] = []
 
 
 def ensure_dirs() -> None:
+    # makes sure folders exist
     os.makedirs(app.static_folder, exist_ok=True)
     os.makedirs(app.template_folder, exist_ok=True)
 
@@ -21,6 +22,7 @@ def ensure_dirs() -> None:
 
 
 def create_test_pdf_if_missing() -> None:
+    # creates sample pdf if missing
     test_pdf_path = os.path.join(app.static_folder, "test.pdf")
     if os.path.exists(test_pdf_path):
         return
@@ -56,6 +58,7 @@ def create_test_pdf_if_missing() -> None:
 
 
 def compute_total(row: dict) -> float:
+    # compute total price with tax
     try:
         qty = float(row.get("quantity", 0) or 0)
         unit = float(row.get("unitCost", 0) or 0)
@@ -70,6 +73,7 @@ def compute_total(row: dict) -> float:
 
 
 def refresh_totals() -> None:
+    # recompute totals for all rows
     for row in ROWS:
         row["total"] = compute_total(row)
 
@@ -87,6 +91,7 @@ def get_rows():
 
 @app.post("/api/rows")
 def add_row():
+    # add a new row fast
     import uuid
     data = request.get_json(force=True) if request.is_json else {}
     row = {
@@ -126,6 +131,7 @@ def add_row():
 
 @app.put("/api/rows/<row_id>")
 def update_row(row_id: str):
+    # update existing row fields quick
     data = request.get_json(force=True)
     for row in ROWS:
         if row["id"] == row_id:
@@ -163,6 +169,7 @@ def update_row(row_id: str):
 
 @app.delete("/api/rows/<row_id>")
 def delete_row(row_id: str):
+    # delete a row by id
     global ROWS
     before = len(ROWS)
     ROWS = [r for r in ROWS if r.get("id") != row_id]
@@ -172,6 +179,7 @@ def delete_row(row_id: str):
 
 
 def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
+    # try pdf then fallback ocr
     """get text from pdf
 
     rn , first step is checking if it works with something like pdfminer, 
@@ -209,6 +217,7 @@ def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
 
 
 def parse_fields_from_text(text: str) -> dict:
+    # grab fields from raw text
     import re
     result: dict = {}
     m_desc = re.search(r"Item\s*[:\-]?\s*([^\n]+)", text, flags=re.IGNORECASE)
@@ -231,6 +240,7 @@ def parse_fields_from_text(text: str) -> dict:
 
 @app.post("/api/upload/<row_id>")
 def upload_and_ocr(row_id: str):
+    # save pdf and run ocr
     if "file" not in request.files:
         return jsonify({"error": "No file"}), 400
     f = request.files["file"]
@@ -256,7 +266,7 @@ def upload_and_ocr(row_id: str):
             if fields:
                 row.update(fields)
                 row["total"] = compute_total(row)
-            # Attach a hint if OCR returned no text
+
             response = dict(row)
             if not (text or "").strip():
                 response["ocrWarning"] = (
@@ -268,6 +278,7 @@ def upload_and_ocr(row_id: str):
 
 @app.post("/api/rows/<row_id>/ocr")
 def rerun_ocr(row_id: str):
+    # run ocr again for row
     """runnign ocr again."""
     for row in ROWS:
         if row.get("id") == row_id:
@@ -299,6 +310,7 @@ def rerun_ocr(row_id: str):
 
 @app.get("/api/chart-data")
 def chart_data():
+    # data for charts quickly
     refresh_totals()
     labels = [f"Row {i+1}" for i in range(len(ROWS))]
     totals = [row.get("total", 0) for row in ROWS]
@@ -311,6 +323,7 @@ def chart_data():
 
 @app.get("/api/audit")
 def audit():
+    # calculate simple audit stats
     refresh_totals()
     non_empty = [r for r in ROWS if (r.get("description") or "").strip() or r.get("quantity") or r.get("unitCost")]
     items = len(non_empty)
@@ -321,6 +334,7 @@ def audit():
 
 @app.get("/api/rows/<row_id>/prices")
 def get_prices(row_id: str):
+    # get price history list
     for row in ROWS:
         if row["id"] == row_id:
             return jsonify(row.get("priceHistory", []))
@@ -329,6 +343,7 @@ def get_prices(row_id: str):
 
 @app.post("/api/rows/<row_id>/prices")
 def add_price(row_id: str):
+    # add a new price point
     data = request.get_json(force=True)
     price_point = {
         "date": data.get("date", datetime.utcnow().date().isoformat()),
@@ -343,6 +358,7 @@ def add_price(row_id: str):
 
 @app.delete("/api/rows/<row_id>/prices/<int:index>")
 def delete_price(row_id: str, index: int):
+    # remove price by index
     for row in ROWS:
         if row["id"] == row_id:
             history = row.setdefault("priceHistory", [])
@@ -355,6 +371,7 @@ def delete_price(row_id: str, index: int):
 
 @app.route("/api/report", methods=["GET", "POST"])
 def generate_report_pdf():
+    # build pdf report quickly
     """Generate a PDF report from posted table data and return it as a download."""
     try:
         payload = request.get_json(force=True) if request.is_json else {}
@@ -425,23 +442,27 @@ def generate_report_pdf():
 
 @app.get("/api/health")
 def health():
+    # simple health check ok
     return {"status": "ok"}
 
 
 @app.route("/static/css/styles.css")
 def serve_css():
+    # serve css static file
     from flask import send_from_directory
     return send_from_directory(app.static_folder + "/css", "styles.css", mimetype="text/css")
 
 
 @app.route("/static/js/app.js")
 def serve_js():
+    # serve js static file
     from flask import send_from_directory
     return send_from_directory(app.static_folder + "/js", "app.js", mimetype="application/javascript")
 
 
 @app.route("/debug/static")
 def debug_static():
+    # quick static debug info
     """Debug route to check if static files are accessible"""
     import os
     static_path = os.path.join(os.getcwd(), "static")
@@ -460,6 +481,7 @@ def debug_static():
 
 
 if __name__ == "__main__":
+    # start flask app here
     ensure_dirs()
     create_test_pdf_if_missing()
     port = int(os.environ.get("PORT", 5000))

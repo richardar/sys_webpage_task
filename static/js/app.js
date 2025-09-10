@@ -1,7 +1,9 @@
 (() => {
+  // track fetch requests count
   const { useState, useEffect, useMemo, useRef } = React;
 
   (function installGlobalFetchTracker() {
+    // monkey patch fetch quick
     if (window.__fetchTrackerInstalled) return;
     window.__fetchTrackerInstalled = true;
     let active = 0;
@@ -19,11 +21,13 @@
   })();
 
   const formatMoney = (value) => {
+    // format number to money
     const num = Number(value || 0);
     return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const computeRowTotal = (row) => {
+    // simple qty times price
     const qty = Number(row.quantity || 0);
     const unit = Number(row.unitCost || 0);
     return qty * unit;
@@ -33,6 +37,7 @@
   const initialRows = [];
 
   function TotalsChart({ rows }) {
+    // renders charts fast
     const barRef = useRef(null);
     const doughnutRef = useRef(null);
     const vendorRef = useRef(null);
@@ -41,6 +46,7 @@
     const vendorChartRef = useRef(null);
 
     const chartData = useMemo(() => {
+      // compute chart data here
       const labels = rows.map((_, i) => `Row ${i + 1}`);
       const totals = rows.map((r) => Number(r.total || 0));
       const byCategory = {};
@@ -55,6 +61,7 @@
     }, [rows]);
 
     useEffect(() => {
+      // init or update charts
       if (barRef.current) {
         if (!barChartRef.current) {
           barChartRef.current = new Chart(barRef.current.getContext('2d'), {
@@ -124,6 +131,7 @@
   }
 
   function PriceHistory({ rowId }) {
+    // show price history table
     const [history, setHistory] = useState([]);
     const [date, setDate] = useState('');
     const [price, setPrice] = useState('');
@@ -131,12 +139,14 @@
     const [deletingIndex, setDeletingIndex] = useState(null);
 
     const load = async () => {
+      // load prices from server
       const res = await fetch(`/api/rows/${rowId}/prices`);
       if (res.ok) setHistory(await res.json());
     };
     useEffect(() => { load(); }, [rowId]);
 
     const add = async () => {
+      // add price point quick
       if (!price) return;
       setIsAdding(true);
       const res = await fetch(`/api/rows/${rowId}/prices`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ date, price }) });
@@ -144,6 +154,7 @@
       setIsAdding(false);
     };
     const removeAt = async (idx) => {
+      // delete price by index
       setDeletingIndex(idx);
       const res = await fetch(`/api/rows/${rowId}/prices/${idx}`, { method: 'DELETE' });
       if (res.status === 204) load();
@@ -177,6 +188,7 @@
   }
 
   function DataRow({ row, onChange, onUpload, onDelete, onRunOcr }) {
+    // one row component ui
     const disabled = !row.storedFileName;
     const [isOcr, setIsOcr] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -335,7 +347,7 @@
   }
 
   function DataTable({ rows, onChangeField, onUpload, onDelete, onRunOcr }) {
-
+    // renders the whole table
     return (
       <div className="table-wrapper">
         <table className="data-table">
@@ -374,6 +386,7 @@
   }
 
   function App() {
+    // main app component
     const [rows, setRows] = useState(initialRows);
     const [netActive, setNetActive] = useState(0);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -406,6 +419,7 @@
     const [auditModal, setAuditModal] = useState({ open: false, data: null, speaking: false });
 
     const showToast = (msg) => {
+      // quick toast message
       setToast(msg);
       window.clearTimeout(showToast._t);
       showToast._t = window.setTimeout(() => setToast(''), 3000);
@@ -413,6 +427,7 @@
 
 
     useEffect(() => {
+      // load initial rows
       const onNet = (e) => setNetActive(e.detail.active || 0);
       window.addEventListener('net:active', onNet);
       (async () => {
@@ -427,6 +442,7 @@
     const labels = useMemo(() => rows.map((_, i) => `Row ${i + 1}`), [rows]);
 
     const addRow = async () => {
+      // open add row modal
       setAddModal((_) => ({
         open: true,
         description: '', date: '', quantity: '', unitCost: '',
@@ -438,6 +454,7 @@
     };
 
     const submitNewRow = async () => {
+      // submit new row to api
       try {
         setIsAddingRow(true);
         if (!addModal.file) { alert('Please choose a PDF'); return; }
@@ -500,6 +517,7 @@
     };
 
     const updateRowField = async (id, patch) => {
+      // update a row on server
       const res = await fetch(`/api/rows/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch) });
       if (!res.ok) return;
       const updated = await res.json();
@@ -507,6 +525,7 @@
     };
 
     const handleFileChange = async (id, file) => {
+      // upload pdf then update
       if (!file) return;
       const form = new FormData();
       form.append('file', file);
@@ -522,6 +541,7 @@
     };
     // setting up constant for running the ocr, this val won' tchange 
     const runOcr = async (id) => {
+      // request rerun ocr now
       try {
         const res = await fetch(`/api/rows/${id}/ocr`, { method: 'POST' });
         if (!res.ok) {
@@ -544,18 +564,21 @@
     };
 
     const viewOcr = (id) => {
+      // open ocr modal view
       const r = rows.find((x) => x.id === id);
       if (!r || !r.ocrText) return;
       setOcrModal({ open: true, text: r.ocrText, title: r.fileName || 'OCR Result' });
     };
 
     const showAuditSummary = async () => {
+      // fetch and show audit
       const res = await fetch('/api/audit');
       const a = await res.json();
       setAuditModal({ open: true, data: a, speaking: false });
     };
 
     const playAudit = () => {
+      // speak audit using tts
       if (!auditModal.data) return;
       const a = auditModal.data;
       const text = `Items: ${a.items}. Grand Total: ${a.grandTotal}. Average per item: ${a.average}.`;
@@ -568,11 +591,13 @@
       } catch (_) {}
     };
     const stopAudit = () => {
+      // stop speaking now
       try { window.speechSynthesis.cancel(); } catch (_) {}
       setAuditModal((m) => ({ ...m, speaking: false }));
     };
 
     const downloadReport = async () => {
+      // download pdf report file
       try {
         setIsGenerating(true);
         const res = await fetch('/api/report');
@@ -598,11 +623,13 @@
     };
 
     const deleteRow = async (id) => {
+      // delete row on server
       const res = await fetch(`/api/rows/${id}`, { method: 'DELETE' });
       if (res.status === 204) setRows((prev) => prev.filter((r) => r.id !== id));
     };
 
     const loadSample = async () => {
+      // load some sample rows
       setIsLoadingSample(true);
 
       const samples = [
