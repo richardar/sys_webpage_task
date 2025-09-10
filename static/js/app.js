@@ -480,7 +480,7 @@
       // submit new row to api
       try {
         setIsAddingRow(true);
-        if (!addModal.file) { alert('Please choose a PDF'); return; }
+        if (!addModal.file) { showToast('Please choose a PDF to continue'); return; }
         const payload = {
           description: addModal.description || '',
           date: addModal.date || undefined,
@@ -554,7 +554,8 @@
       form.append('file', file);
       const res = await fetch(`/api/upload/${id}`, { method: 'POST', body: form });
       if (!res.ok) {
-        alert('Upload failed');
+        console.error('Upload failed');
+        showToast('Upload failed on free Render. Please retry.');
         return;
       }
       const updated = await res.json();
@@ -671,6 +672,7 @@
         const pdfBlob = await pdfRes.blob();
         const sampleFile = new File([pdfBlob], 'sample.pdf', { type: 'application/pdf' });
 
+        let addedCount = 0;
         for (const s of samples) {
           const res = await fetch('/api/rows', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(s) });
           if (!res.ok) throw new Error('Failed creating sample row');
@@ -694,12 +696,19 @@
           };
           const put = await fetch(`/api/rows/${row.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sampleData) });
           if (put.ok) updated = await put.json();
-          setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)).concat(prev.find((r) => r.id === updated.id) ? [] : [updated]));
+          setRows((prev) => {
+            const existed = prev.find((r) => r.id === updated.id);
+            const next = prev.map((r) => (r.id === updated.id ? updated : r)).concat(existed ? [] : [updated]);
+            if (!existed) addedCount += 1;
+            return next;
+          });
         }
-        showToast('Loaded sample rows with attached PDF');
+        if (addedCount > 0) {
+          showToast('Loaded sample rows with attached PDF');
+        }
       } catch (err) {
-        console.error(err);
-        alert((err && err.message) || 'Failed to load sample data');
+        console.error('Load sample data failed:', err);
+        // Intentionally no alert; UX: do nothing if partial/none loaded
       } finally {
         setIsLoadingSample(false);
       }
@@ -802,7 +811,8 @@
                         }));
                       } catch (_) {
                         setAddModal((m) => ({ ...m, isUploading: false }));
-                        alert('Upload failed');
+                        console.error('Upload failed');
+                        showToast('Upload failed on free Render. Please retry.');
                       }
                     }} />
                   </label>
