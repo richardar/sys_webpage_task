@@ -1,4 +1,4 @@
-with the same import os
+import os
 import json
 import time
 from datetime import datetime
@@ -447,16 +447,16 @@ def health():
 
 @app.route("/static/css/styles.css")
 def serve_css():
-    # serve css static file
+    # explicit static file route (keeps prod behavior consistent)
     from flask import send_from_directory
-    return send_from_directory(app.static_folder + "/css", "styles.css", mimetype="text/css")
+    return send_from_directory(os.path.join("static", "css"), "styles.css", mimetype="text/css")
 
 
 @app.route("/static/js/app.js")
 def serve_js():
-    # serve js static file
+    # explicit static file route (keeps prod behavior consistent)
     from flask import send_from_directory
-    return send_from_directory(app.static_folder + "/js", "app.js", mimetype="application/javascript")
+    return send_from_directory(os.path.join("static", "js"), "app.js", mimetype="application/javascript")
 
 
 @app.route("/debug/static")
@@ -478,10 +478,12 @@ def debug_static():
     })
 
 
+# Ensure directories and sample assets exist at import time (works under Gunicorn)
+ensure_dirs()
+create_test_pdf_if_missing()
+
 if __name__ == "__main__":
-    # start flask app 
-    ensure_dirs()
-    create_test_pdf_if_missing()
+    # start flask app
     port = int(os.environ.get("PORT", 5000))
     debug = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
     app.run(host="0.0.0.0", port=port, debug=debug)
