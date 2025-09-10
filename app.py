@@ -447,16 +447,26 @@ def health():
 
 @app.route("/static/css/styles.css")
 def serve_css():
-    # explicit static file route (keeps prod behavior consistent)
-    from flask import send_from_directory
-    return send_from_directory(os.path.join("static", "css"), "styles.css", mimetype="text/css")
+    # explicit static file route (robust absolute path + graceful errors)
+    from flask import send_from_directory, abort
+    base_dir = os.path.dirname(__file__)
+    dir_path = os.path.join(base_dir, "static", "css")
+    try:
+        return send_from_directory(dir_path, "styles.css", mimetype="text/css")
+    except Exception:
+        abort(404)
 
 
 @app.route("/static/js/app.js")
 def serve_js():
-    # explicit static file route (keeps prod behavior consistent)
-    from flask import send_from_directory
-    return send_from_directory(os.path.join("static", "js"), "app.js", mimetype="application/javascript")
+    # explicit static file route (robust absolute path + graceful errors)
+    from flask import send_from_directory, abort
+    base_dir = os.path.dirname(__file__)
+    dir_path = os.path.join(base_dir, "static", "js")
+    try:
+        return send_from_directory(dir_path, "app.js", mimetype="application/javascript")
+    except Exception:
+        abort(404)
 
 
 @app.route("/debug/static")
