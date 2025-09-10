@@ -3,8 +3,74 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Flask + React Table, Chart, OCR</title>
+    <title>SYS test - Gratus Richard Anthuvan Rosario</title>
     <link rel="stylesheet" href="/static/css/styles.css" />
+    <style>
+      /* Fallback styles in case external CSS doesn't load */
+      button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #d0d0d7;
+        background: white;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 14px;
+        transition: background-color 0.2s;
+      }
+      button:hover:not(:disabled) {
+        background: #f5f5f5;
+      }
+      button:disabled { 
+        opacity: 0.6; 
+        cursor: not-allowed; 
+      }
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #cfcfd6;
+        border-top-color: #555;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.8s linear infinite;
+        vertical-align: -2px;
+        margin-right: 6px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 1000;
+      }
+      .modal {
+        background: #fff;
+        border-radius: 10px;
+        width: min(720px, 95vw);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border-bottom: 1px solid #eee;
+      }
+      .modal-body {
+        padding: 12px;
+        white-space: pre-wrap;
+        overflow: auto;
+        flex: 1;
+      }
+    </style>
 
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>

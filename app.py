@@ -428,6 +428,37 @@ def health():
     return {"status": "ok"}
 
 
+@app.route("/static/css/styles.css")
+def serve_css():
+    from flask import send_from_directory
+    return send_from_directory(app.static_folder + "/css", "styles.css", mimetype="text/css")
+
+
+@app.route("/static/js/app.js")
+def serve_js():
+    from flask import send_from_directory
+    return send_from_directory(app.static_folder + "/js", "app.js", mimetype="application/javascript")
+
+
+@app.route("/debug/static")
+def debug_static():
+    """Debug route to check if static files are accessible"""
+    import os
+    static_path = os.path.join(os.getcwd(), "static")
+    css_path = os.path.join(static_path, "css", "styles.css")
+    js_path = os.path.join(static_path, "js", "app.js")
+    
+    return jsonify({
+        "static_folder": app.static_folder,
+        "template_folder": app.template_folder,
+        "css_exists": os.path.exists(css_path),
+        "js_exists": os.path.exists(js_path),
+        "css_path": css_path,
+        "js_path": js_path,
+        "working_directory": os.getcwd()
+    })
+
+
 if __name__ == "__main__":
     ensure_dirs()
     create_test_pdf_if_missing()

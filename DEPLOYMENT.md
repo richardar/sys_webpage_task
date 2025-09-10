@@ -98,6 +98,15 @@ These will increase your build time and memory usage. Render's free tier should 
 - Ensure all file paths are relative, not absolute
 - Verify that all required directories are created
 
+### Styling Issues (Buttons look like default HTML)
+If buttons appear as default HTML buttons instead of styled ones:
+
+1. **Check CSS loading**: Visit `https://your-app.onrender.com/debug/static` to verify static files are accessible
+2. **Clear browser cache**: Hard refresh (Ctrl+F5) to reload CSS
+3. **Check browser console**: Look for 404 errors on CSS/JS files
+4. **Fallback styles**: The app includes inline CSS as fallback, so basic styling should work
+5. **Static file serving**: The app has explicit routes for CSS and JS files
+
 ### OCR Issues
 - OCR may fail on the free tier due to memory constraints
 - Add error handling for OCR failures
