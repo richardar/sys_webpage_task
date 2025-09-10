@@ -278,7 +278,7 @@ def upload_and_ocr(row_id: str):
 
 @app.post("/api/rows/<row_id>/ocr")
 def rerun_ocr(row_id: str):
-    # run ocr again for row
+    # run ocr again 
     """runnign ocr again."""
     for row in ROWS:
         if row.get("id") == row_id:
@@ -358,7 +358,7 @@ def add_price(row_id: str):
 
 @app.delete("/api/rows/<row_id>/prices/<int:index>")
 def delete_price(row_id: str, index: int):
-    # remove price by index
+    # remove price 
     for row in ROWS:
         if row["id"] == row_id:
             history = row.setdefault("priceHistory", [])
@@ -371,8 +371,7 @@ def delete_price(row_id: str, index: int):
 
 @app.route("/api/report", methods=["GET", "POST"])
 def generate_report_pdf():
-    # build pdf report quickly
-    """Generate a PDF report from posted table data and return it as a download."""
+    # build pdf report 
     try:
         payload = request.get_json(force=True) if request.is_json else {}
         rows = payload.get("rows") if payload.get("rows") is not None else ROWS
@@ -463,7 +462,6 @@ def serve_js():
 @app.route("/debug/static")
 def debug_static():
     # quick static debug info
-    """Debug route to check if static files are accessible"""
     import os
     static_path = os.path.join(os.getcwd(), "static")
     css_path = os.path.join(static_path, "css", "styles.css")
@@ -481,7 +479,7 @@ def debug_static():
 
 
 if __name__ == "__main__":
-    # start flask app here
+    # start flask app 
     ensure_dirs()
     create_test_pdf_if_missing()
     port = int(os.environ.get("PORT", 5000))
